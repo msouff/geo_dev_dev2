@@ -25,10 +25,7 @@
 
   <script type="text/javascript">
     var styleCache = {};
-    var styleFunction = function(feature, resolution) {
-      // 2012_Earthquakes_Mag5.kml stores the magnitude of each earthquake in a
-      // standards-violating <magnitude> tag in each Placemark.  We extract it from
-      // the Placemark's name instead.
+    var styleFunction = function(feature) {
       var name = feature.get('name');
       var magnitude = parseFloat(name.substr(2));
       var radius = 5 + 20 * (magnitude - 5);
@@ -51,7 +48,7 @@
       return style;
     };
 
-    var vector1 = new ol.layer.Vector({
+    var streams = new ol.layer.Vector({
       source: new ol.source.KML({
         projection: ol.proj.get('EPSG:3857'),
         url: '/static/my_first_app/kml/streams_with_dams/doc.kml'
@@ -59,7 +56,7 @@
       style: styleFunction
     });
 
-    var vector2 = new ol.layer.Vector({
+    var watersheds = new ol.layer.Vector({
       source: new ol.source.KML({
         projection: ol.proj.get('EPSG:3857'),
         url: '/static/my_first_app/kml/watershed_with_dams/doc.kml'
@@ -67,7 +64,7 @@
       style: styleFunction
     });
 
-    var vector = new ol.layer.Vector({
+    var dams = new ol.layer.Vector({
       source: new ol.source.KML({
         projection: ol.proj.get('EPSG:3857'),
         url: '/static/my_first_app/kml/dams/doc.kml'
@@ -82,7 +79,7 @@
     });
 
     var map = new ol.Map({
-      layers: [raster, vector2, vector1, vector],
+      layers: [raster, watersheds, streams, dams],
       target: 'map',
       view: new ol.View({
         center: ol.proj.transform([-111.592488, 39.588263], 'EPSG:4326', 'EPSG:3857'),
@@ -109,12 +106,13 @@
       var feature = map.forEachFeatureAtPixel(evt.pixel,
           function(feature, layer) {
             return feature;
-          });
+          }
+      );
 
       //if we found a feature then create and show the popup.
       if (feature) {
         var geometry = feature.getGeometry();
-        if (geometry.getType()=== 'Point') {
+        if (geometry.getType() === 'Point') {
           var coord = geometry.getCoordinates();
           popup.setPosition(coord);
           var displaycontent = '<b>Dam Name:</b> ' + feature.get('name');
@@ -137,11 +135,11 @@
     // change mouse cursor when over marker
     $(map.getViewport()).on('mousemove', function (e) {
         var pixel = map.getEventPixel(e.originalEvent);
-        var hit = map.forEachFeatureAtPixel(pixel, function (feature, layer) {
+        var hit = map.forEachFeatureAtPixel(pixel, function () {
             return true;
         });
         var feature = map.forEachFeatureAtPixel(pixel,
-          function(feature, layer) {
+          function(feature) {
           return feature;
         });
         if (feature) {
@@ -167,7 +165,7 @@
         left: pixel[0] + 'px',
         top: (pixel[1] - 15) + 'px'
       });
-      var feature = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+      var feature = map.forEachFeatureAtPixel(pixel, function(feature) {
         return feature;
       });
       if (feature) {
