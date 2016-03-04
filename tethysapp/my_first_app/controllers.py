@@ -1,7 +1,5 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .model import SessionMaker, StreamGage
-from tethys_gizmos.gizmo_options import MapView, MVLayer, MVView, TextInput
 
 
 @login_required()
